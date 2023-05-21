@@ -1,0 +1,76 @@
+---
+title: "R Exercise"
+date: "2023-05-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+Loading some data about iris species (Schwertlilien) with a little help from <https://www.kaggle.com/code/leolcling/visualizing-iris-datasets-with-r-ggplot2/notebook>. The first 6 rows are shown.
+
+```{r}
+library('ggplot2')
+library(readr)
+options(repr.plot.width = 6, repr.plot.height = 6) # resize the plots 
+Iris <- read.csv('iris.csv') # downloaded from https://gist.github.com/netj/8836201
+class(Iris) 
+head(Iris)
+```
+
+## Scatter Plot
+
+A scatter plot with x-axis: Sepal.Length and y-axis: Sepal.Width, and the species shown in different colors
+
+```{r}
+ggplot(data=Iris,aes(x=sepal.length, y=sepal.width, color=variety)) + geom_point(size = 4)
+```
+
+### Regression Line
+
+A regression line for the previous plot with the whole data set (regardless of the species)
+
+```{r}
+ggplot(data=Iris,aes(x=sepal.length, y=sepal.width)) + geom_point(size = 4) + geom_smooth(method = "lm", se=FALSE)
+```
+
+### Pearson correlation
+
+The Pearson correlation for this plot
+
+```{r}
+cor(Iris$sepal.length, Iris$sepal.width)
+```
+
+## Box plot
+
+A box plot for Petal.Width with 3 species separately in the x-axis in different colors
+
+```{r}
+ggplot(data=Iris, aes(x=variety, y=petal.width, color=variety)) + geom_boxplot()
+```
+
+## Histogram
+
+A histogram for Petal.Width with 3 species separately in x-axis in different colors
+
+```{r}
+ggplot(data=Iris, aes(x=petal.width, fill=variety)) + geom_histogram()
+```
+
+## T-test
+
+A t-test of Petal.Width between species setosa and virginica, and give the conclusion if the width is a statistically significant difference between 2 species. Some helpful info on this was found in <http://www.sthda.com/english/wiki/unpaired-two-samples-t-test-in-r>
+
+```{r }
+# load data from csv that only includes petal.width and species setosa and virginica
+Petals <- read.csv('iris2.csv')
+class(Petals) 
+res <- t.test(petal.width ~ variety, data = Petals, var.equal = TRUE)
+res
+```
+
+The p-value is smaller than 0.05, so it is significant (conditions for applicability of t-test have not been checked).
