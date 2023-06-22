@@ -1,0 +1,97 @@
+---
+title: "Data_Clean"
+date: "2023-06-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task: Statistics
+
+```{r}
+library(readr)
+PatVis <- read.csv('patients_visits.csv')
+head(PatVis)
+```
+
+### Sub task 1
+
+Is the BMI different between the healthy and control group?
+
+```{r}
+library('ggplot2')
+ggplot(data=PatVis, aes(x=Disease, y=BMI, group=Disease)) + geom_violin()
+```
+```{r}
+suppressPackageStartupMessages(library(dplyr))
+by_dis <- PatVis %>% group_by(Disease)
+res <- t.test(BMI ~ Disease, data = by_dis)
+res
+```
+Conclusion: BMI doesn't differ significantly between the groups.
+
+### Sub task 2
+
+Is the proportion of Smoke status different between the healthy and control group?
+
+```{r}
+table(PatVis$Disease, PatVis$Smoking_status)
+chisq.test(PatVis$Disease, PatVis$Smoking_status, correct=FALSE)
+```
+Retrying because of "Chi-squared approximation may be incorrect" warning:
+```{r}
+D <- as.table(rbind(c(92, 214, 254), c(258, 635, 750)))
+dimnames(D) <- list(health = c("diseased", "healthy"),
+                    smoking = c("Current","Never","Previous"))
+D
+chisq.test(D)
+```
+
+Conclusion: The proportion of smoke status differs between the healthy and control group, but not on a significant level.
+
+### Sub task 3
+
+Is the smoke status related to the number of Hospital visits regardless of the disease?
+
+```{r}
+anova_graph <- ggplot(data = PatVis, mapping = aes(x = Smoking_status, y = Visit_No)) + geom_boxplot()
+anova_graph
+```
+
+```{r}
+anova_model <- aov(data = PatVis, formula = Visit_No ~ Smoking_status)
+summary(anova_model)
+```
+
+Conclusion: The smoke status does not seem to be related to the number of hospital visits.
+
+### Sub task 4
+
+Is the number of visits higher in the Disease group than in the Healthy group?
+
+```{r}
+by_dis <- PatVis %>% group_by(Disease)
+res <- t.test(Visit_No ~ Disease, data = by_dis)
+res
+```
+
+Conclusion: Hospital visits do not significantly differ between the groups.
+
+### Sub task 5
+
+Do Males have a higher current smoke percentage compared to Females?
+
+```{r}
+table(PatVis$Sex, PatVis$Smoking_status, exclude="Prefer not to answer")
+```
+```{r}
+M <- as.table(rbind(c(106, 529), c(244, 1324)))
+dimnames(M) <- list(sex = c("Female", "Male"),
+                    smoking = c("Current","Never or previous"))
+M
+chisq.test(M)
+```
+
+Conclusion: The current smoking percentage does not differ significantly between males and females (~15.5% in males and ~16.7% in females).
